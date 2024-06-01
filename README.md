@@ -1,7 +1,9 @@
 # Peeper Pam
 ##  Materials
 ### Server 
-Raspberry Pi 5 with a Kit
+- Raspberry Pi 5
+- Kit
+- camera module 
 
 ### Detector
 - Analogue voltmeter (5V)
