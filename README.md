@@ -13,7 +13,11 @@
 - Mosfet
 - Red LED
 
-This is the server code that lives on the pi5 and the client code that lives on the pico W.
+## Assembly
+
+## Installing
+
+## Running
 
 ## Start the server running on the Pi 5
 You do that on a virtual environment which you activate with
