@@ -1,4 +1,15 @@
 # Peeper Pam
+##  Materials
+### Server 
+Raspberry Pi 5 with a Kit
+
+### Detector
+- Analogue voltmeter (5V)
+- Pico
+- 220 ohm resistor
+- 1K ohm resistor
+- Mosfet
+- Red LED
 
 This is the server code that lives on the pi5 and the client code that lives on the pico W.
 
