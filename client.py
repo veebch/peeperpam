@@ -21,7 +21,7 @@ wlan.active(True)
 wlan.connect(SSID, PASSWORD)
 
 while not wlan.isconnected():
-    passvi 
+    pass
 
 print("Connected to Wi-Fi")
 print("IP Address:", wlan.ifconfig()[0])
@@ -198,7 +198,7 @@ def parse_string(input_string):
 
 
 
-alert = PWM(Pin(15, Pin.OUT, value=0))
+alert = PWM(Pin(28, Pin.OUT, value=0))
 alert.freq(1000)  # 1 kHz PWM frequency
 asyncio.run(listen_for_signal())
 
