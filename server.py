@@ -1,12 +1,17 @@
 import asyncio
 import websockets
+import re
 
 async def send_signals(websocket):
     while True:
         try:
-            await websocket.send("Signal")
-            print("Signal sent")
-            await asyncio.sleep(2)  # Send signal every 2 seconds
+            # read the contents of the Object file, just a single line string then if it contains 'person' then broadcast it
+            with open('objects.txt', 'r') as f:
+                output = f.read()
+            if re.search('person', output):
+                await websocket.send(output)
+                print("Signal sent")
+                await asyncio.sleep(.2)  # Send signal every .2 seconds
         except websockets.exceptions.ConnectionClosed:
             print("Connection closed while sending signals")
             break
@@ -37,4 +42,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
