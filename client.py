@@ -163,7 +163,7 @@ async def listen_for_signal():
             ws.connect()
             while True:
                 signal = ws.recv()
-                if signal and "Objects" in signal:
+                if signal and "Object" in signal:
                     print("Signal received:",signal)
                     perform_action(signal)
         except Exception as e:
@@ -180,7 +180,7 @@ def perform_action(signal):
     set_duty_cycle(duty)
     
 def set_duty_cycle(duty):
-    alert.duty_u16(int(duty * 65535 / 100))
+    alert.duty_u16(int(duty * 65535 ))
     
 def parse_string(input_string):
     # Check if the string contains the word 'person'
