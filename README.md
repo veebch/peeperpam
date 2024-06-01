@@ -19,14 +19,14 @@
 
 ## Running
 
-## Start the server running on the Pi 5
+### Start the server running on the Pi 5
 You do that on a virtual environment which you activate with
 ```
 python3 -m venv ~/.venv
 source ~/.venv/bin/activate
 python3 server.py
 ```
-Start the camera monitor script
+### Start the camera monitor script
 ```
 ./camera_monitor.sh
 ```
