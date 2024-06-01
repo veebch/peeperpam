@@ -9,6 +9,11 @@ python3 -m venv .venv
 source ~/.venv/bin/activate
 python3 server.py
 ```
+Start the camera monitor script
+```
+./camera_monitor.sh
+```
+
 Now plug in the device to power, it will autorun
 
 
