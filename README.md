@@ -2,7 +2,7 @@
 
 # Peeper Pam
 
-How to make a desktop device that receives alerts from a server that is performing computer vision analysis on a live stream. It uses a Raspberry pi 5, with a camera and AI kit as the server, and a Pico W as the client.
+How to make a desktop device that receives alerts from a server that is performing computer vision analysis on a live stream. It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client.
 
 ##  Materials
 ### Server 
