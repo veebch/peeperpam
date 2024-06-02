@@ -25,7 +25,15 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 
 ## Assembly
 
+
 ## Installing
+
+Copy this repository to the Pi 5 using the commands 
+```
+cd ~
+git clone https://github.com/veebch/peeperpam.git
+```
+Then copy the file `main.py` to the pico using Ampy (or Thonny)
 
 ## Running
 
@@ -34,6 +42,7 @@ You do that on a virtual environment which you activate with
 ```
 python3 -m venv ~/.venv
 source ~/.venv/bin/activate
+cd ~/peeperpam
 python3 server.py
 ```
 ### Start the camera monitor script
