@@ -13,7 +13,7 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 ### Server 
 - Raspberry Pi 5
 - Raspberry Pi AI Kit
-- camera module 
+- Camera module 
 
 ### Detector
 - Analogue voltmeter (5V)
