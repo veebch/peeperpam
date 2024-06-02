@@ -4,7 +4,7 @@
 
 # Peeper Pam
 
-An overengineered reboot of the old ThinkGeek C.H.I.M.P. monitor mirror. AKA How to make a desktop device that receives alerts when people are detected by a server that is performing computer vision analysis on a live stream. 
+An overengineered reboot of the old ThinkGeek C.H.I.M.P. monitor mirror. AKA How to make a desktop device that provides alerts when people are detected on a live-stream by a server that is performing computer vision analysis. 
 
 It uses a Raspberry Pi 5, with a camera and a Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the Pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' via an analogue needle.
 
