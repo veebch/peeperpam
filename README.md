@@ -18,9 +18,9 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 ### Detector
 - Analogue voltmeter (5V)
 - Pico W
-- 220 ohm resistor
-- 1K ohm resistor
-- Mosfet
+- 220 Ohm resistor
+- 1K 0hm resistor
+- MOSFET (BS170
 - Red LED
 
 ## Assembly
@@ -31,7 +31,11 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 
 ### Detector
 
-
+- GPI0 28 is soldered to the 1K Ohm resistor which in turn is soldered to the gate of the MOSFET. 
+- The SYSBUS connection is connected the positive terminal of the voltmeter. 
+- The positive terminal on the voltmeter is then connected to one end the 220 Ohm resistor and the other end of the resistor to the Anode (positive) leg of the LED. 
+- The Cathode (negative) leg of the LED is then connected to the Source leg on the MOSFET. 
+- The Drain leg of the MOSFET is connected to the Negative terminal on the voltmeter, which is then connected to a GND GPIO on the Pico W.
 
 ## Installing
 
