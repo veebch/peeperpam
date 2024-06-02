@@ -4,7 +4,9 @@
 
 # Peeper Pam
 
-How to make a desktop device that receives alerts when people are detected by a server that is performing computer vision analysis on a live stream. It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle.
+How to make a desktop device that receives alerts when people are detected by a server that is performing computer vision analysis on a live stream. 
+
+It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle.
 
 ##  Materials
 ### Server 
