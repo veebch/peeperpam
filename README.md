@@ -8,6 +8,7 @@ How to make a desktop device that receives alerts when people are detected by a 
 
 It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle.
 
+## Explainer Video
 ##  Materials
 ### Server 
 - Raspberry Pi 5
@@ -42,4 +43,4 @@ python3 server.py
 
 Now plug in the device to power, any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
 
-## Video
+
