@@ -11,7 +11,7 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 ##  Materials
 ### Server 
 - Raspberry Pi 5
-- Kit
+- Raspberry Pi AI Kit
 - camera module 
 
 ### Detector
