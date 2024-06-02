@@ -17,7 +17,7 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 
 ### Detector
 - Analogue voltmeter (5V)
-- Pico
+- Pico W
 - 220 ohm resistor
 - 1K ohm resistor
 - Mosfet
