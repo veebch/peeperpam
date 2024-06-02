@@ -38,4 +38,4 @@ python3 server.py
 
 Now plug in the device to power, any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
 
-
+## Video
