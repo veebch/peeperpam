@@ -16,11 +16,11 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 - Camera module 
 
 ### Detector
-- Analogue voltmeter (5V)
+- Analogue voltmeter (5V) 
 - Pico W
 - 220 Ohm resistor
 - 1K 0hm resistor
-- MOSFET (BS170
+- MOSFET (We used a Small Signal BS170)
 - Red LED
 
 ## Assembly
