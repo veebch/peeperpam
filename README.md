@@ -25,6 +25,13 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 
 ## Assembly
 
+### Server
+
+Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin ribbon cable from the CAM/DISP 0 port on the Pi.
+
+### Detector
+
+
 
 ## Installing
 
