@@ -19,7 +19,7 @@ It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, a
 - Analogue voltmeter (5V) 
 - Pico W
 - 220 Ohm resistor
-- 1K 0hm resistor
+- 1K Ohm resistor
 - MOSFET (We used a Small Signal BS170)
 - Red LED
 
