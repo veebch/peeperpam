@@ -1,30 +1,43 @@
-![Action Shot](/images/sketch.jpg)
+![Sketch](/images/sketch.jpg)
 
 [![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCz5BOU9J9pB_O0B8-rDjCWQ?style=flat&logo=youtube&logoColor=red&labelColor=white&color=ffed53)](https://www.youtube.com/channel/UCz5BOU9J9pB_O0B8-rDjCWQ) [![Instagram](https://img.shields.io/github/stars/veebch?style=flat&logo=github&logoColor=black&labelColor=white&color=ffed53)](https://www.instagram.com/v_e_e_b/)
 
 # Peeper Pam
 
-How to make a desktop device that receives alerts when people are detected by a server that is performing computer vision analysis on a live stream. 
+An overengineered reboot of the old ThinkGeek C.H.I.M.P. monitor mirror. 
 
-It uses a Raspberry Pi 5, with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle.
+AKA How to make a desktop device that provides alerts you when human(s) are detected on a live-stream by a server that is performing computer vision analysis. 
+
+It uses a Raspberry Pi 5, with a camera and a Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the Pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle that registers on a scale of 0-1.
 
 ## Explainer Video
 ##  Materials
 ### Server 
 - Raspberry Pi 5
 - Raspberry Pi AI Kit
-- camera module 
+- Camera module 
 
 ### Detector
-- Analogue voltmeter (5V)
-- Pico
-- 220 ohm resistor
-- 1K ohm resistor
-- Mosfet
+- Analogue voltmeter (5V) 
+- Pico W
+- 220 Ohm resistor
+- 1K Ohm resistor
+- MOSFET (We used a Small Signal BS170)
 - Red LED
 
 ## Assembly
 
+### Server
+
+Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin ribbon cable from the CAM/DISP 0 port on the Pi.
+
+### Detector
+
+- From the Pico GPIO 28 is soldered to the 1K Ohm resistor which in turn is soldered to the gate of the MOSFET. 
+- The SYSBUS connection is connected the positive terminal of the voltmeter. 
+- The positive terminal on the voltmeter is then connected to one end the 220 Ohm resistor and the other end of the resistor to the Anode (positive) leg of the LED. 
+- The Cathode (negative) leg of the LED is then connected to the Source leg on the MOSFET. 
+- The Drain leg of the MOSFET is connected to the Negative terminal on the voltmeter, which is then connected to a GND GPIO on the Pico W.
 
 ## Installing
 
