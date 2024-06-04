@@ -11,6 +11,12 @@ AKA How to make a desktop device that provides alerts you when human(s) are dete
 It uses a Raspberry Pi 5, with a camera and a Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the Pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle that registers on a scale of 0-1.
 
 ## Explainer Video
+
+An overview of the build and a demo of it in action:
+
+[![YouTube](http://i.ytimg.com/vi/Vn3WaVIr5v0/hqdefault.jpg)](https://www.youtube.com/watch?v=Vn3WaVIr5v0)
+
+
 ##  Materials
 ### Server 
 - Raspberry Pi 5
