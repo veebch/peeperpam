@@ -12,7 +12,7 @@ It uses a Raspberry Pi 5, with a camera and a Raspberry Pi AI kit as the server,
 
 ## Explainer Video
 
-An overview of the build and a demo of it in action:
+Here's an overview video of the build and a demo of it in action:
 
 [![YouTube](http://i.ytimg.com/vi/Vn3WaVIr5v0/hqdefault.jpg)](https://www.youtube.com/watch?v=Vn3WaVIr5v0)
 
