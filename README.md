@@ -73,4 +73,4 @@ Now plug in the device to power, any time the camera registers a person the Red 
 
 ## Caveats
 
-The MOSFET may be overkill for the LED and Voltmeter, but if you plan to use something that draws more current than an LED, then using SYSBUS means it can draw a lot more current than just a GPIO pin set to high. 
+The MOSFET may be overkill for the LED and Voltmeter, but if you plan to use something that draws more current than an LED, then using SYSBUS means it can draw a lot more current than just a GPIO pin set to high (~12mA). 
