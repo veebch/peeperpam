@@ -1,4 +1,4 @@
-![Sketch](/images/sketch.jpg)
+![Sketch](/images/actionshot.png)
 
 [![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCz5BOU9J9pB_O0B8-rDjCWQ?style=flat&logo=youtube&logoColor=red&labelColor=white&color=ffed53)](https://www.youtube.com/channel/UCz5BOU9J9pB_O0B8-rDjCWQ) [![Instagram](https://img.shields.io/github/stars/veebch?style=flat&logo=github&logoColor=black&labelColor=white&color=ffed53)](https://www.instagram.com/v_e_e_b/)
 
@@ -11,6 +11,12 @@ AKA How to make a desktop device that provides alerts you when human(s) are dete
 It uses a Raspberry Pi 5, with a camera and a Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the Pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle that registers on a scale of 0-1.
 
 ## Explainer Video
+
+Here's an overview video of the build and a demo of it in action:
+
+[![YouTube](http://i.ytimg.com/vi/Vn3WaVIr5v0/hqdefault.jpg)](https://www.youtube.com/watch?v=Vn3WaVIr5v0)
+
+
 ##  Materials
 ### Server 
 - Raspberry Pi 5
@@ -37,7 +43,7 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 - The SYSBUS connection is connected the positive terminal of the voltmeter. 
 - The positive terminal on the voltmeter is then connected to one end the 220 Ohm resistor and the other end of the resistor to the Anode (positive) leg of the LED. 
 - The Cathode (negative) leg of the LED is then connected to the Source leg on the MOSFET. 
-- The Drain leg of the MOSFET is connected to the Negative terminal on the voltmeter, which is then connected to a GND GPIO on the Pico W.
+- The Source leg of the MOSFET is connected to the Negative terminal on the voltmeter, the Drain leg of the MOSFET is then connected to a GND GPIO on the Pico W.
 
 ## Installing
 
@@ -65,4 +71,6 @@ python3 server.py
 
 Now plug in the device to power, any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
 
+## Caveats
 
+The MOSFET may be overkill for the LED and Voltmeter, but if you plan to use something that draws more current than an LED, then using SYSBUS means the 'alarm' peripheral can draw a lot more current than just a GPIO pin set to high (~16mA). 
