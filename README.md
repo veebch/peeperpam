@@ -43,7 +43,9 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 - The SYSBUS connection is connected the positive terminal of the voltmeter. 
 - The positive terminal on the voltmeter is then connected to one end the 220 Ohm resistor and the other end of the resistor to the Anode (positive) leg of the LED. 
 - The Cathode (negative) leg of the LED is then connected to the Source leg on the MOSFET. 
-- The Source leg of the MOSFET is connected to the Negative terminal on the voltmeter, the Drain leg of the MOSFET is then connected to a GND GPIO on the Pico W.
+- The Source leg of the MOSFET is connected to the Negative terminal on the voltmeter, the Drain leg of the MOSFET is then connected to a GND GPIO on the Pico W. Here's a photo of the back of the detector
+
+![Detector](/images/detector.jpg)
 
 ## Installing
 
