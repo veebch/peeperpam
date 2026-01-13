@@ -8,23 +8,76 @@ import re
 from machine import Pin, PWM
 
 # Replace these with your Wi-Fi credentials
-SSID = 'SSID HERE'
-PASSWORD = 'PASSWORD HERE'
-
+SSID = 'whyayefi'
+PASSWORD = 'dizzyflower278'
 # Replace with your Raspberry Pi's IP address
-SERVER_IP = 'PI IP HERE'
+SERVER_IP = '192.168.1.166'
 SERVER_PORT = 6789
+
+# RGB LED pins with PWM
+red_pin = PWM(Pin(18))
+green_pin = PWM(Pin(19))
+blue_pin = PWM(Pin(20))
+
+# Set PWM frequency for LED
+for pin in [red_pin, green_pin, blue_pin]:
+    pin.freq(1000)
+    pin.duty_u16(0)
+
+# Alert PWM pin
+alert = PWM(Pin(27))
+alert.freq(1000)
 
 # Connect to Wi-Fi
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(SSID, PASSWORD)
-
 while not wlan.isconnected():
     pass
-
 print("Connected to Wi-Fi")
 print("IP Address:", wlan.ifconfig()[0])
+
+def set_rgb_pwm(r, g, b):
+    """Set RGB LED color using PWM values (0-65535)"""
+    red_pin.duty_u16(r)
+    green_pin.duty_u16(g)
+    blue_pin.duty_u16(b)
+
+def update_led_from_pwm(duty_ratio):
+    """Update LED color based on PWM duty cycle (0.0 to 1.0)
+    Green at 0%, transitions to red at 100%"""
+    red = int(duty_ratio * 65535)
+    green = int((1 - duty_ratio) * 65535)
+    set_rgb_pwm(red, green, 0)
+
+def set_duty_cycle(duty):
+    # Clamp duty to 0.0-1.0 range
+    duty = max(0.0, min(1.0, duty))
+    alert.duty_u16(int(duty * 65535))
+    # Update LED color to match PWM value
+    update_led_from_pwm(duty)
+
+def startup_sequence():
+    """Startup sequence: ramp up to full over 2 seconds, then down over 2 seconds"""
+    ramp_duration = 2.0
+    steps = 100
+    step_duration = ramp_duration / steps
+
+    # Ramp up
+    print("Starting up - ramping up...")
+    for i in range(steps + 1):
+        duty = i / steps
+        set_duty_cycle(duty)
+        time.sleep(step_duration)
+
+    # Ramp down
+    print("Ramping down...")
+    for i in range(steps, -1, -1):
+        duty = i / steps
+        set_duty_cycle(duty)
+        time.sleep(step_duration)
+
+    print("Startup complete")
 
 class WebSocketClient:
     def __init__(self, server_ip, port):
@@ -40,7 +93,6 @@ class WebSocketClient:
                 self.sock = socket.socket()
                 self.sock.connect(addr)
                 print(f"Connected to {self.server_ip}:{self.port}")
-
                 # Handshake
                 sec_websocket_key = ubinascii.b2a_base64(os.urandom(16)).strip()
                 handshake = (b"GET / HTTP/1.1\r\n"
@@ -63,7 +115,6 @@ class WebSocketClient:
                 self.sock = None
                 print("Retrying connection in 5 seconds...")
                 time.sleep(5)
-#                await asyncio.sleep(5)
 
     def read_bytes(self, num_bytes):
         data = bytearray()
@@ -81,12 +132,10 @@ class WebSocketClient:
             opcode = first_byte & 0b00001111
             masked = second_byte & 0b10000000
             payload_length = second_byte & 0b01111111
-
             if payload_length == 126:
                 payload_length = int.from_bytes(self.read_bytes(2), 'big')
             elif payload_length == 127:
                 payload_length = int.from_bytes(self.read_bytes(8), 'big')
-
             if masked:
                 masking_key = self.read_bytes(4)
                 payload = bytearray(self.read_bytes(payload_length))
@@ -94,17 +143,14 @@ class WebSocketClient:
                     payload[i] ^= masking_key[i % 4]
             else:
                 payload = self.read_bytes(payload_length)
-
             if opcode == 0x8:  # Close frame
                 print("Received close frame")
                 self.send_close_frame()
                 return None
-
             if opcode == 0x9:  # Ping frame
                 print("Received ping frame")
                 self.send_pong_frame()
                 return None
-
             message = payload.decode('utf-8')
             print("Received message:", message)
             return message
@@ -117,7 +163,6 @@ class WebSocketClient:
         frame = bytearray()
         frame.append(0x80 | opcode)
         payload_length = len(payload)
-
         if payload_length < 126:
             frame.append(0x80 | payload_length)
         elif payload_length <= 0xFFFF:
@@ -126,16 +171,13 @@ class WebSocketClient:
         else:
             frame.append(0x80 | 127)
             frame.extend(payload_length.to_bytes(8, 'big'))
-
         masking_key = os.urandom(4)
         frame.extend(masking_key)
-
         if payload:
             masked_payload = bytearray(payload)
             for i in range(len(masked_payload)):
                 masked_payload[i] ^= masking_key[i % 4]
             frame.extend(masked_payload)
-
         self.sock.send(frame)
 
     def send_close_frame(self):
@@ -156,32 +198,6 @@ class WebSocketClient:
             self.sock = None
         print("Socket closed")
 
-async def listen_for_signal():
-    while True:
-        ws = WebSocketClient(SERVER_IP, SERVER_PORT)
-        try:
-            ws.connect()
-            while True:
-                signal = ws.recv()
-                if signal and "Object" in signal:
-                    print("Signal received:",signal)
-                    perform_action(signal)
-        except Exception as e:
-            print("Error:", e)
-        finally:
-            ws.close()
-            await asyncio.sleep(5)  # Reconnect after a delay if the connection is lost
-
-def perform_action(signal):
-    print("Performing the action!")
-    # Look at the message and set PWM accordingly
-    duty = parse_string(signal)
-    print(duty)  #
-    set_duty_cycle(duty)
-    
-def set_duty_cycle(duty):
-    alert.duty_u16(int(duty * 65535 ))
-    
 def parse_string(input_string):
     # Check if the string contains the word 'person'
     if 'person' in input_string:
@@ -193,12 +209,34 @@ def parse_string(input_string):
             number_in_parentheses = 0
     else:
         number_in_parentheses = 0
-    
+
     return number_in_parentheses
 
+def perform_action(signal):
+    print("Performing the action!")
+    # Look at the message and set PWM accordingly
+    duty = parse_string(signal)
+    print(duty)
+    set_duty_cycle(duty)
 
+async def listen_for_signal():
+    while True:
+        ws = WebSocketClient(SERVER_IP, SERVER_PORT)
+        try:
+            ws.connect()
+            while True:
+                signal = ws.recv()
+                if signal and "Object" in signal:
+                    print("Signal received:", signal)
+                    perform_action(signal)
+        except Exception as e:
+            print("Error:", e)
+        finally:
+            ws.close()
+            await asyncio.sleep(5)
 
-alert = PWM(Pin(28, Pin.OUT, value=0))
-alert.freq(1000)  # 1 kHz PWM frequency
+# Run startup sequence
+startup_sequence()
+
 asyncio.run(listen_for_signal())
 
