@@ -56,7 +56,6 @@ git clone https://github.com/raspberrypi/rpicam-apps
 
 Copy this repository to the Pi 5 using the commands 
 ```
-cd ~
 git clone https://github.com/veebch/peeperpam.git
 ```
 Then copy the file `main.py` to the pico using Ampy (or Thonny)
