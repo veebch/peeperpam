@@ -49,6 +49,12 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 
 ## Installing
 
+First, make sure you have the rpicam-apps files in your home directory
+```
+cd ~
+git clone https://github.com/raspberrypi/rpicam-apps
+```
+
 Copy this repository to the Pi 5 using the commands 
 ```
 cd ~
@@ -70,6 +76,7 @@ python3 server.py
 ```
 ./camera_monitor.sh
 ```
+If your username on the raspberry pi is anything other than 'pi' then you should alter the path to the rpicam-apps file in this shell script.
 
 Now plug in the device to power, any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
 
