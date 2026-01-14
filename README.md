@@ -77,7 +77,8 @@ python3 server.py
 ```
 If your username on the raspberry pi is anything other than 'pi' then you should alter the path to the rpicam-apps file in this shell script.
 
-Now plug in the device to power, any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
+Now plug in the device to power, once an internet connection is established, the eyes will glow green and cycle to red before turning green again. 
+Any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
 
 ## Caveats
 
