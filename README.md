@@ -29,7 +29,7 @@ Here's an overview video of the build and a demo of it in action:
 - 220 Ohm resistor
 - 1K Ohm resistor
 - MOSFET (We used a Small Signal BS170)
-- Red LED
+- A 4 legged RGB LED
 
 ## Assembly
 
@@ -39,10 +39,9 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 
 ### Detector
 
-- From the Pico GPIO 28 is soldered to the 1K Ohm resistor which in turn is soldered to the gate of the MOSFET. 
+- From the Pico GPIO 27 is soldered to the 1K Ohm resistor which in turn is soldered to the gate (middle pin) of the MOSFET. 
 - The VSYS connection on the Pico is connected the positive terminal of the voltmeter. 
-- The positive terminal on the voltmeter is then connected to one end the 220 Ohm resistor and the other end of the resistor to the Anode (positive) leg of the LED. 
-- The Cathode (negative) leg of the LED is then connected to the Source leg on the MOSFET. 
+- The Cathode (negative) leg of the LED is connected to a GND pin on the Pico in series with the 220 ohm resistor. The Red, Green and Blue legs are connected to GP18, GP19 and GP20 respectively
 - The Source leg of the MOSFET is connected to the Negative terminal on the voltmeter, the Drain leg of the MOSFET is then connected to a GND GPIO on the Pico W. Here's a photo of the back of the detector
 
 ![Detector](/images/detector.jpg)
