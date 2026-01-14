@@ -11,7 +11,7 @@ from machine import Pin, PWM
 SSID = <YOUR WIFI SSID>
 PASSWORD = <YOUR WIFI PASSWORD>
 # Replace with your Raspberry Pi's IP address
-SERVER_IP = '192.168.1.166'
+SERVER_IP = <IP ADDRESS OF RASPBERRY PI>
 SERVER_PORT = 6789
 
 # RGB LED pins with PWM
