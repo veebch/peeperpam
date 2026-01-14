@@ -39,7 +39,7 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 
 ### Detector
 
-- From the Pico GPIO 27 is soldered to the 1K Ohm resistor which in turn is soldered to the gate (middle pin) of the MOSFET. 
+- From the Pico, GPIO 27 is soldered to the 1K Ohm resistor which in turn is soldered to the gate (middle pin) of the MOSFET. 
 - The VSYS connection on the Pico is connected the positive terminal of the voltmeter. 
 - The Cathode (negative) leg of the LED is connected to a GND pin on the Pico in series with the 220 ohm resistor. The Red, Green and Blue legs are connected to GP18, GP19 and GP20 respectively
 - The Source leg of the MOSFET is connected to the Negative terminal on the voltmeter, the Drain leg of the MOSFET is then connected to a GND GPIO on the Pico W. Here's a photo of the back of the detector
