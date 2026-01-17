@@ -6,9 +6,9 @@
 
 An overengineered reboot of the old ThinkGeek C.H.I.M.P. monitor mirror. 
 
-AKA How to make a desktop device that provides alerts you when human(s) are detected on a live-stream by a server that is performing computer vision analysis. 
+AKA How to make a desktop device that provides alerts when objects are detected on a live-stream by a server performing computer vision analysis. 
 
-It uses a Raspberry Pi 5, with a camera and a Raspberry Pi AI kit as the server, and a Pico W as the client. Alerts are sent to the Pico using websockets and alerts are made by lighting an LED and showing model confidence for detection of 'person' using an analogue needle that registers on a scale of 0-1.
+It uses a Raspberry Pi 5 with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client. The system detects all objects but provides priority-based responses: person+cup combinations trigger 100% alerts, person detection alone triggers 70% response, cup detection triggers 30% response, and other interesting objects trigger 10% response. Alerts are sent via WebSocket with RGB LED color changes and PWM-controlled analog needle movement showing detection confidence.
 
 ## Explainer Video
 
@@ -16,6 +16,19 @@ Here's an overview video of the build and a demo of it in action (it shows the i
 
 [![YouTube](http://i.ytimg.com/vi/Vn3WaVIr5v0/hqdefault.jpg)](https://www.youtube.com/watch?v=Vn3WaVIr5v0)
 
+
+## Project Structure
+
+### Server Components
+- **combined_monitor.py** - Complete Raspberry Pi camera monitoring system that captures video, performs object detection using AI kit, and broadcasts all detected objects with confidence scores via WebSocket
+
+### Client Components  
+- **main.py** - MicroPython WebSocket client for Pico W that receives detection data and provides priority-based responses:
+  - Person + Cup: 100% PWM alert (red LED)
+  - Person only: 70% PWM response 
+  - Cup only: 30% PWM response
+  - Other objects: 10% PWM response
+  - LED color transitions from green (0%) to red (100%) based on detection priority
 
 ##  Materials
 ### Server 
@@ -62,22 +75,40 @@ Then copy the file `main.py` to the pico using Ampy (or Thonny)
 
 ## Running
 
-### Start the server running on the Pi 5
-You do that on a virtual environment which you activate with
+### Prerequisites
+Make sure you have the rpicam-apps installed:
+```bash
+cd ~
+git clone https://github.com/raspberrypi/rpicam-apps
 ```
+
+### Start the Complete Monitoring System
+Set up Python environment and run the integrated server:
+```bash
 python3 -m venv ~/.venv
 source ~/.venv/bin/activate
 cd ~/peeperpam
-python3 server.py
+pip install websockets  # Install required WebSocket library
+python3 combined_monitor.py
 ```
-### Start the camera monitor script
-```
-./camera_monitor.sh
-```
-If your username on the raspberry pi is anything other than 'pi' then you should alter the path to the rpicam-apps file in this shell script.
 
-Now plug in the device to power, once an internet connection is established, the eyes will glow green and cycle to red before turning green again. 
-Any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
+This single command starts both the camera monitoring and WebSocket server that broadcasts all detected objects.
+
+### Configure and Deploy the Client
+1. Edit the WiFi credentials in `main.py`:
+   - Replace `SSID = "whyayefi"` with your network name
+   - Replace `PASSWORD = "your_actual_password"` with your WiFi password
+   - Ensure `SERVER_IP = "peeper.local"` matches your Pi's hostname
+
+2. Copy `main.py` to your Pico W using Ampy, Thonny, or your preferred method
+
+3. Power on the Pico W - it will automatically connect to WiFi and start receiving detection alerts
+
+### System Operation
+- The system detects all objects but responds with different priority levels
+- RGB LED changes from green (low priority) to red (high priority) 
+- Analog needle shows detection confidence scaled by priority level
+- WebSocket connection automatically reconnects if interrupted
 
 ## Caveats
 

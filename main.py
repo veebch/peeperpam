@@ -55,19 +55,19 @@ while not wlan.isconnected() and connection_attempts < max_attempts:
     time.sleep(0.1)
 
 if not wlan.isconnected():
-    print("❌ Failed to connect to WiFi after", max_attempts/10, "seconds")
-    print("❌ WiFi Status:", wlan.status())
-    print("❌ Check your SSID and password")
+    print("Failed to connect to WiFi after", max_attempts/10, "seconds")
+    print("WiFi Status:", wlan.status())
+    print("Check your SSID and password")
     # Don't continue without WiFi
     while True:
         time.sleep(1)
 
-print("✓ Connected to Wi-Fi successfully")
+print("Connected to Wi-Fi successfully")
 ip_info = wlan.ifconfig()
-print("✓ IP Address:", ip_info[0])
-print("✓ Subnet Mask:", ip_info[1])
-print("✓ Gateway:", ip_info[2])
-print("✓ DNS:", ip_info[3])
+print("IP Address:", ip_info[0])
+print("Subnet Mask:", ip_info[1])
+print("Gateway:", ip_info[2])
+print("DNS:", ip_info[3])
 
 # Wait a moment for network stack to fully initialize
 print("Waiting for network stack to stabilize...")
@@ -91,19 +91,19 @@ def set_duty_cycle(duty, verbose=True):
     original_duty = duty
     duty = max(0.0, min(1.0, duty))
     if original_duty != duty and verbose:
-        print("⚠ Duty cycle clamped from", original_duty, "to", duty)
+        print("WARNING: Duty cycle clamped from", original_duty, "to", duty)
     
     pwm_value = int(duty * 65535)
     alert.duty_u16(pwm_value)
     if verbose:
-        print("📊 PWM set to", duty, "(", pwm_value, "/65535)")
+        print("PWM set to", duty, "(", pwm_value, "/65535)")
     
     # Update LED color to match PWM value
     update_led_from_pwm(duty)
     if verbose:
         red_val = int(duty*65535)
         green_val = int((1-duty)*65535)
-        print("🔴🟢 LED color updated (red:", red_val, ", green:", green_val, ")")
+        print("LED color updated (red:", red_val, ", green:", green_val, ")")
 
 def startup_sequence():
     """Startup sequence: ramp up to full over 2 seconds, then down over 2 seconds"""
@@ -262,23 +262,23 @@ class WebSocketClient:
 
 def parse_detection_data(message):
     """Parse detection data and return appropriate PWM duty cycle"""
-    print("🔍 Parsing detection data...")
+    print("Parsing detection data...")
     try:
         data = json.loads(message)
-        print("✅ Successfully parsed JSON data")
+        print("Successfully parsed JSON data")
         
         all_objects = data.get("all_objects", {})
         avg_confidence = data.get("average_confidence", 0.0)
         is_alert = data.get("alert", False)
         
         if all_objects:
-            print("📋 All objects detected:", all_objects)
+            print("All objects detected:", all_objects)
             
             # Priority 1: High alert for person+cup combination
             if is_alert:
-                print("🚨 HIGH PRIORITY ALERT!")
+                print("HIGH PRIORITY ALERT!")
                 conf_percent = avg_confidence * 100
-                print("📈 Alert confidence:", avg_confidence, "(", conf_percent, "%)")
+                print("Alert confidence:", avg_confidence, "(", conf_percent, "%)")
                 return avg_confidence
             
             # Priority 2: Respond to person detection (medium priority)
@@ -286,7 +286,7 @@ def parse_detection_data(message):
                 person_data = all_objects["person"]
                 if isinstance(person_data, dict):
                     person_conf = person_data["confidence"]
-                    print("👤 Person detected - confidence:", person_conf)
+                    print("Person detected - confidence:", person_conf)
                     # Scale down to 70% for person-only detection
                     return person_conf * 0.7
                     
@@ -295,7 +295,7 @@ def parse_detection_data(message):
                 cup_data = all_objects["cup"]
                 if isinstance(cup_data, dict):
                     cup_conf = cup_data["confidence"]
-                    print("☕ Cup detected - confidence:", cup_conf)
+                    print("Cup detected - confidence:", cup_conf)
                     # Scale down to 30% for cup-only detection
                     return cup_conf * 0.3
                     
@@ -307,11 +307,11 @@ def parse_detection_data(message):
                         obj_data = all_objects[obj]
                         if isinstance(obj_data, dict):
                             obj_conf = obj_data["confidence"]
-                            print(f"📱 {obj.title()} detected - confidence:", obj_conf)
+                            print(f"{obj.title()} detected - confidence:", obj_conf)
                             # Very low response for other objects
                             return obj_conf * 0.1
                             
-                print("📊 Objects detected but no priority matches")
+                print("Objects detected but no priority matches")
                 
         return 0.0  # No significant objects detected
             
@@ -339,14 +339,14 @@ def parse_string_legacy(input_string):
     return number_in_parentheses
 
 def perform_action(signal):
-    print("🎬 Processing detection signal!")
+    print("Processing detection signal!")
     # Parse the detection data (JSON or legacy string)
     duty = parse_detection_data(signal)
     if duty > 0:
-        print("⚡ Setting PWM duty to:", duty)
+        print("Setting PWM duty to:", duty)
         set_duty_cycle(duty)
     else:
-        print("💤 No significant detection - PWM remains at current level")
+        print("No significant detection - PWM remains at current level")
 
 async def listen_for_signal():
     while True:
@@ -358,13 +358,13 @@ async def listen_for_signal():
                 if signal:
                     # Handle all JSON detection messages
                     if signal.startswith('{'):
-                        print("📡 Detection message received")
+                        print("Detection message received")
                         perform_action(signal)
                     elif "Object" in signal or "person" in signal:
-                        print("📡 Legacy signal received:", signal)
+                        print("Legacy signal received:", signal)
                         perform_action(signal)
                     else:
-                        print("📝 Server message:", signal)
+                        print("Server message:", signal)
         except Exception as e:
             print("Error:", e)
         finally:
