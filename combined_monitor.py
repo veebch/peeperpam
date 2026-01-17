@@ -8,11 +8,12 @@ import sys
 import json
 import time
 import logging
+import argparse
 from collections import defaultdict
 from datetime import datetime
 
 class CameraMonitor:
-    def __init__(self):
+    def __init__(self, show_preview=False):
         self.current_detection = {"person": 0, "cup": 0}
         self.all_objects = {}
         self.signal_active = False
@@ -20,6 +21,7 @@ class CameraMonitor:
         self.camera_process = None
         self.frame_count = 0
         self.last_detection_time = None
+        self.show_preview = show_preview
         
         # Setup logging
         logging.basicConfig(
@@ -31,20 +33,26 @@ class CameraMonitor:
         
     async def start_camera_monitoring(self):
         """Start the camera process and monitor its output"""
-        # For more elegant production use, consider switching to:
-        # - rpicam-vid (better for continuous video with processing)
-        # - picamera2 (Python native, more control)
-        # - libcamera Python bindings
+        # Build command based on preview preference
+        cmd = ["rpicam-vid", "-v", "2", "-t", "0", "--inline"]
         
-        cmd = [
-            "rpicam-vid", "-n", "-v", "2", "-t", "0", "--inline",
+        if not self.show_preview:
+            cmd.append("-n")  # No preview for headless/SSH mode
+            
+        cmd.extend([
             "--post-process-file", "/home/pi/rpicam-apps/assets/hailo_yolo8_inference.json",
             "--width", "640", "--height", "640",
             "--framerate", "10", "-o", "-"
-        ]
+        ])
         
-        self.logger.info("Starting camera monitoring with rpicam-vid...")
+        mode = "with preview window" if self.show_preview else "headless (no preview)"
+        self.logger.info(f"Starting camera monitoring {mode}...")
         self.logger.info(f"Command: {' '.join(cmd)}")
+        
+        if self.show_preview:
+            self.logger.info("📺 Preview window should appear for testing")
+        else:
+            self.logger.info("🔒 Running headless - suitable for SSH connections")
         
         try:
             self.camera_process = await asyncio.create_subprocess_exec(
@@ -273,21 +281,64 @@ def signal_handler(signum, frame):
     sys.exit(0)
 
 async def main():
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Combined Camera Monitor with Object Detection')
+    parser.add_argument('--preview', action='store_true', 
+                       help='Show camera preview window (for local testing)')
+    parser.add_argument('--headless', action='store_true',
+                       help='Run without preview window (for SSH/remote)')
+    
+    args = parser.parse_args()
+    
+    # Determine preview mode
+    show_preview = False
+    if args.preview:
+        show_preview = True
+    elif args.headless:
+        show_preview = False
+    else:
+        # Auto-detect: check if DISPLAY is set (local) or not (SSH)
+        import os
+        show_preview = 'DISPLAY' in os.environ and os.environ['DISPLAY']
+    
     # Set up signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    monitor = CameraMonitor()
+    monitor = CameraMonitor(show_preview=show_preview)
     await monitor.run()
 
 if __name__ == "__main__":
-    print("Starting Combined Camera Monitor with Enhanced Logging")
-    print("WebSocket server will be available on ws://0.0.0.0:6789")
-    print("Press Ctrl+C to stop")
+    parser = argparse.ArgumentParser(description='Combined Camera Monitor with Object Detection')
+    parser.add_argument('--preview', action='store_true', 
+                       help='Show camera preview window (for local testing)')
+    parser.add_argument('--headless', action='store_true',
+                       help='Run without preview window (for SSH/remote)')
+    
+    args = parser.parse_args()
+    
+    print("🔍 Combined Camera Monitor with Enhanced Detection")
+    print("📡 WebSocket server will be available on ws://0.0.0.0:6789")
     print()
-    print("Camera: Switching from rpicam-hello to rpicam-vid for better production use")
-    print("Logging: Enhanced verbose detection logging enabled")
-    print("Output: JSON-formatted WebSocket messages with full object detection data")
+    
+    if args.preview:
+        print("📺 Preview mode: Camera window will be displayed")
+    elif args.headless:
+        print("🔒 Headless mode: No camera window (SSH-friendly)")
+    else:
+        display_available = 'DISPLAY' in __import__('os').environ
+        if display_available:
+            print("📺 Auto-detected: Local display available, showing preview")
+        else:
+            print("🔒 Auto-detected: No display (SSH), running headless")
+    
+    print()
+    print("Usage examples:")
+    print("  python3 combined_monitor.py --preview    # Force preview window")
+    print("  python3 combined_monitor.py --headless   # Force no preview") 
+    print("  python3 combined_monitor.py             # Auto-detect")
+    print()
+    print("Press Ctrl+C to stop")
     print()
     
     try:
