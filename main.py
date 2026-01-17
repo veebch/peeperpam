@@ -307,7 +307,7 @@ def parse_detection_data(message):
                         obj_data = all_objects[obj]
                         if isinstance(obj_data, dict):
                             obj_conf = obj_data["confidence"]
-                            print(f"{obj.title()} detected - confidence:", obj_conf)
+                            print(obj.title() + " detected - confidence:", obj_conf)
                             # Very low response for other objects
                             return obj_conf * 0.1
                             
