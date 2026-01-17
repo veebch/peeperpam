@@ -133,7 +133,7 @@ class CameraMonitor:
         # Count other common objects for verbose logging
         other_objects = ["bottle", "chair", "dining table", "laptop", "cell phone", "book"]
         for obj in other_objects:
-            matches = len(re.findall(f r'\b{obj}\b', line_lower))
+            matches = len(re.findall(fr'\b{obj}\b', line_lower))
             if matches > 0:
                 self.all_objects[obj] = matches
                 objects_found.append(f"{matches} {obj}(s)")
