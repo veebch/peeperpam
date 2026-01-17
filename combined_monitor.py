@@ -33,19 +33,24 @@ class CameraMonitor:
         
     async def start_camera_monitoring(self):
         """Start the camera process and monitor its output"""
-        # Build command based on preview preference
-        cmd = ["rpicam-vid", "-v", "2", "-t", "0", "--inline"]
+        # Use different commands for preview vs headless mode
+        if self.show_preview:
+            # Use rpicam-hello for preview mode - it's designed for this
+            cmd = [
+                "rpicam-hello", "-v", "2", "-t", "0",
+                "--post-process-file", "/home/pi/rpicam-apps/assets/hailo_yolov8_inference.json",
+                "--lores-width", "640", "--lores-height", "640"
+            ]
+        else:
+            # Use rpicam-vid for headless mode with output capture
+            cmd = [
+                "rpicam-vid", "-n", "-v", "2", "-t", "0", "--inline",
+                "--post-process-file", "/home/pi/rpicam-apps/assets/hailo_yolov8_inference.json",
+                "--width", "640", "--height", "640",
+                "--framerate", "10", "-o", "-"
+            ]
         
-        if not self.show_preview:
-            cmd.append("-n")  # No preview for headless/SSH mode
-            
-        cmd.extend([
-            "--post-process-file", "/home/pi/rpicam-apps/assets/hailo_yolo8_inference.json",
-            "--width", "640", "--height", "640",
-            "--framerate", "10", "-o", "-"
-        ])
-        
-        mode = "with preview window" if self.show_preview else "headless (no preview)"
+        mode = "with preview window (rpicam-hello)" if self.show_preview else "headless (rpicam-vid)"
         self.logger.info(f"Starting camera monitoring {mode}...")
         self.logger.info(f"Command: {' '.join(cmd)}")
         
