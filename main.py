@@ -5,6 +5,7 @@ import uasyncio as asyncio
 import os
 import time
 import re
+import ujson as json
 from machine import Pin, PWM
 
 # Replace these with your Wi-Fi credentials
@@ -198,7 +199,42 @@ class WebSocketClient:
             self.sock = None
         print("Socket closed")
 
-def parse_string(input_string):
+def parse_detection_data(message):
+    """Parse modern JSON detection data from camera monitor"""
+    try:
+        data = json.loads(message)
+        
+        # Check if this is an alert with target detection
+        if data.get("alert", False):
+            # Get average confidence for PWM control
+            avg_confidence = data.get("average_confidence", 0.0)
+            
+            # Log detailed detection info
+            target_detection = data.get("target_detection", {})
+            all_objects = data.get("all_objects", {})
+            
+            print(f"Alert! Target: {target_detection}")
+            print(f"All objects: {all_objects}")
+            print(f"Average confidence: {avg_confidence}")
+            
+            return avg_confidence
+            
+        elif data.get("status") == "active":
+            # Ongoing detection - get current confidence
+            avg_confidence = data.get("average_confidence", 0.0)
+            print(f"Active detection - confidence: {avg_confidence}")
+            return avg_confidence
+            
+    except (ValueError, KeyError) as e:
+        print(f"Error parsing JSON: {e}")
+        
+        # Fallback to old string parsing for compatibility
+        return parse_string_legacy(message)
+    
+    return 0.0
+
+def parse_string_legacy(input_string):
+    """Legacy string parsing for backward compatibility"""
     # Check if the string contains the word 'person'
     if 'person' in input_string:
         # Use regex to find the number in parentheses
@@ -214,9 +250,9 @@ def parse_string(input_string):
 
 def perform_action(signal):
     print("Performing the action!")
-    # Look at the message and set PWM accordingly
-    duty = parse_string(signal)
-    print(duty)
+    # Parse the detection data (JSON or legacy string)
+    duty = parse_detection_data(signal)
+    print(f"Setting PWM duty to: {duty}")
     set_duty_cycle(duty)
 
 async def listen_for_signal():
@@ -226,9 +262,14 @@ async def listen_for_signal():
             ws.connect()
             while True:
                 signal = ws.recv()
-                if signal and "Object" in signal:
-                    print("Signal received:", signal)
-                    perform_action(signal)
+                if signal:
+                    # Handle both JSON alerts and legacy string format
+                    if signal.startswith('{') or "alert" in signal:
+                        print("Detection signal received:", signal[:100] + "..." if len(signal) > 100 else signal)
+                        perform_action(signal)
+                    elif "Object" in signal:
+                        print("Legacy signal received:", signal)
+                        perform_action(signal)
         except Exception as e:
             print("Error:", e)
         finally:
