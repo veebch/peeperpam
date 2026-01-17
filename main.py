@@ -307,16 +307,7 @@ def parse_detection_data(message):
                         obj_data = all_objects[obj]
                         if isinstance(obj_data, dict):
                             obj_conf = obj_data["confidence"]
-                            obj_name = str(obj).capitalize()
-                            print(obj_name + " detected - confidence:", obj_conf)
-                            # Very low response for other objects
-                            return obj_conf * 0.1
-                            
-                print("Objects detected but no priority matches")
-                
-        return 0.0  # No significant objects detected
-            
-    except (ValueError, KeyError) as e:
+                                print(obj + " detected - confidence:", obj_conf)
         print("Error parsing JSON:", str(e))
         
         # Fallback to old string parsing for compatibility
