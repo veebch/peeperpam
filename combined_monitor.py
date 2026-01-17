@@ -235,41 +235,55 @@ class CameraMonitor:
             self.logger.info(f"Removed {len(disconnected)} disconnected WebSocket clients")
     
     async def handle_websocket_connection(self, websocket, path):
-        """Handle new WebSocket connections"""
+        """Handle new WebSocket connections - simplified like working server.py"""
         self.connected_clients.add(websocket)
         client_info = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
         self.logger.info(f"New WebSocket connection from {client_info}. Total clients: {len(self.connected_clients)}")
         
-        try:
-            # Send periodic updates while signal is active
+        # Create a dedicated sending task for this client (like server.py)
+        async def send_signals_to_client():
             while True:
-                if self.signal_active:
-                    # Send JSON format with full detection data
-                    avg_confidence = (self.current_confidence["person"] + self.current_confidence["cup"]) / 2
-                    message = {
-                        "status": "active",
-                        "timestamp": datetime.now().isoformat(),
-                        "frame": self.frame_count,
-                        "detection": self.current_detection,
-                        "confidence": self.current_confidence,
-                        "average_confidence": round(avg_confidence, 3),
-                        "all_objects": self.all_objects
-                    }
-                    await websocket.send(json.dumps(message))
-                    await asyncio.sleep(0.2)  # Send every 0.2 seconds while active
-                else:
-                    # Send periodic ping to keep connection alive
-                    try:
-                        await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    except asyncio.TimeoutError:
-                        await websocket.ping()
-                        await asyncio.sleep(1.0)
+                try:
+                    if self.signal_active:
+                        # Send JSON format with full detection data
+                        avg_confidence = (self.current_confidence["person"] + self.current_confidence["cup"]) / 2
+                        message = {
+                            "alert": True,
+                            "timestamp": datetime.now().isoformat(),
+                            "frame": self.frame_count,
+                            "target_detection": self.current_detection,
+                            "target_confidence": self.current_confidence,
+                            "average_confidence": round(avg_confidence, 3),
+                            "all_objects": self.all_objects,
+                            "message": f"Detection active (avg confidence: {avg_confidence:.3f})"
+                        }
+                        await websocket.send(json.dumps(message))
+                        self.logger.info(f"Signal sent to {client_info}")
+                        
+                    await asyncio.sleep(0.2)  # Send signal every 0.2 seconds like server.py
+                except websockets.exceptions.ConnectionClosed:
+                    self.logger.info(f"Connection closed while sending signals to {client_info}")
+                    break
+        
+        # Start the sending task
+        signal_task = asyncio.create_task(send_signals_to_client())
+        
+        try:
+            # Handle incoming messages (like server.py)
+            while True:
+                try:
+                    message = await asyncio.wait_for(websocket.recv(), timeout=10)
+                    self.logger.info(f"Received message from {client_info}: {message}")
+                except asyncio.TimeoutError:
+                    self.logger.debug(f"No message received from {client_info}, sending ping to keep connection alive")
+                    await websocket.ping()
                         
         except websockets.exceptions.ConnectionClosed:
             self.logger.info(f"WebSocket connection from {client_info} closed normally")
         except Exception as e:
             self.logger.error(f"WebSocket error with {client_info}: {e}")
         finally:
+            signal_task.cancel()  # Clean up the sending task
             self.connected_clients.discard(websocket)
             self.logger.info(f"Client {client_info} disconnected. Remaining clients: {len(self.connected_clients)}")
     
