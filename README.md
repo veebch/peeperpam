@@ -12,7 +12,7 @@ It uses a Raspberry Pi 5, with a camera and a Raspberry Pi AI kit as the server,
 
 ## Explainer Video
 
-Here's an overview video of the build and a demo of it in action:
+Here's an overview video of the build and a demo of it in action (it shows the initial red led only version):
 
 [![YouTube](http://i.ytimg.com/vi/Vn3WaVIr5v0/hqdefault.jpg)](https://www.youtube.com/watch?v=Vn3WaVIr5v0)
 
@@ -56,7 +56,6 @@ git clone https://github.com/raspberrypi/rpicam-apps
 
 Copy this repository to the Pi 5 using the commands 
 ```
-cd ~
 git clone https://github.com/veebch/peeperpam.git
 ```
 Then copy the file `main.py` to the pico using Ampy (or Thonny)
@@ -77,7 +76,8 @@ python3 server.py
 ```
 If your username on the raspberry pi is anything other than 'pi' then you should alter the path to the rpicam-apps file in this shell script.
 
-Now plug in the device to power, any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
+Now plug in the device to power, once an internet connection is established, the eyes will glow green and cycle to red before turning green again. 
+Any time the camera registers a person the Red Led will light up and the needle/light level will give an approximation of the probability (1 == certainty)
 
 ## Caveats
 
