@@ -15,6 +15,7 @@ from datetime import datetime
 class CameraMonitor:
     def __init__(self, show_preview=False):
         self.current_detection = {"person": 0, "cup": 0}
+        self.current_confidence = {"person": 0.0, "cup": 0.0}
         self.all_objects = {}
         self.signal_active = False
         self.connected_clients = set()
@@ -116,9 +117,10 @@ class CameraMonitor:
         return any(indicator in line.lower() for indicator in detection_indicators)
     
     def parse_detection_line(self, line):
-        """Parse a detection line and update object counts"""
+        """Parse a detection line and update object counts with confidence"""
         # Reset counts for this frame
         self.current_detection = {"person": 0, "cup": 0}
+        self.current_confidence = {"person": 0.0, "cup": 0.0}
         self.all_objects = {}
         
         line_lower = line.lower()
@@ -126,22 +128,32 @@ class CameraMonitor:
         # Log the raw detection line
         self.logger.info(f"Raw detection: {line}")
         
-        # Parse different object types and their counts
+        # Parse different object types and their counts with confidence
         objects_found = []
         
-        # Count persons
-        person_matches = len(re.findall(r'\bperson\b', line_lower))
-        if person_matches > 0:
-            self.current_detection["person"] = person_matches
-            self.all_objects["person"] = person_matches
-            objects_found.append(f"{person_matches} person(s)")
+        # Count persons with confidence
+        person_confidences = []
+        person_pattern = r'person[^(]*\(([\d.]+)\)'
+        person_matches = re.findall(person_pattern, line_lower)
+        if person_matches:
+            self.current_detection["person"] = len(person_matches)
+            person_confidences = [float(conf) for conf in person_matches]
+            avg_person_conf = sum(person_confidences) / len(person_confidences)
+            self.current_confidence["person"] = avg_person_conf
+            self.all_objects["person"] = {"count": len(person_matches), "confidence": avg_person_conf}
+            objects_found.append(f"{len(person_matches)} person(s) @{avg_person_conf:.2f}")
         
-        # Count cups
-        cup_matches = len(re.findall(r'\bcup\b', line_lower))
-        if cup_matches > 0:
-            self.current_detection["cup"] = cup_matches
-            self.all_objects["cup"] = cup_matches
-            objects_found.append(f"{cup_matches} cup(s)")
+        # Count cups with confidence
+        cup_confidences = []
+        cup_pattern = r'cup[^(]*\(([\d.]+)\)'
+        cup_matches = re.findall(cup_pattern, line_lower)
+        if cup_matches:
+            self.current_detection["cup"] = len(cup_matches)
+            cup_confidences = [float(conf) for conf in cup_matches]
+            avg_cup_conf = sum(cup_confidences) / len(cup_confidences)
+            self.current_confidence["cup"] = avg_cup_conf
+            self.all_objects["cup"] = {"count": len(cup_matches), "confidence": avg_cup_conf}
+            objects_found.append(f"{len(cup_matches)} cup(s) @{avg_cup_conf:.2f}")
         
         # Count other common objects for verbose logging
         other_objects = ["bottle", "chair", "dining table", "laptop", "cell phone", "book"]
@@ -155,6 +167,11 @@ class CameraMonitor:
         if objects_found:
             self.logger.info(f"Frame {self.frame_count} objects: {', '.join(objects_found)}")
             self.logger.info(f"Target detection: {self.current_detection['person']} person(s), {self.current_detection['cup']} cup(s)")
+            
+            # Calculate and log average confidence when signal conditions met
+            if self.current_detection["person"] == 1 and self.current_detection["cup"] == 1:
+                avg_confidence = (self.current_confidence["person"] + self.current_confidence["cup"]) / 2
+                self.logger.info(f"🎯 Target met! Average confidence: {avg_confidence:.3f}")
         else:
             self.logger.debug(f"Frame {self.frame_count}: No relevant objects detected")
     
@@ -187,13 +204,19 @@ class CameraMonitor:
             self.logger.debug("No WebSocket clients connected for broadcast")
             return
             
+        # Calculate average confidence of target objects
+        avg_confidence = (self.current_confidence["person"] + self.current_confidence["cup"]) / 2
+        
+        # Send modern JSON format with rich object detection data
         message = {
             "alert": True,
             "timestamp": datetime.now().isoformat(),
             "frame": self.frame_count,
             "target_detection": self.current_detection,
+            "target_confidence": self.current_confidence,
+            "average_confidence": round(avg_confidence, 3),
             "all_objects": self.all_objects,
-            "message": "1 person and 1 cup detected"
+            "message": f"1 person and 1 cup detected (avg confidence: {avg_confidence:.3f})"
         }
         
         message_str = json.dumps(message)
@@ -202,7 +225,7 @@ class CameraMonitor:
         for websocket in self.connected_clients:
             try:
                 await websocket.send(message_str)
-                self.logger.info(f"Alert sent to WebSocket client")
+                self.logger.info(f"Alert sent to WebSocket client: avg confidence {avg_confidence:.3f}")
             except websockets.exceptions.ConnectionClosed:
                 disconnected.add(websocket)
         
@@ -221,11 +244,15 @@ class CameraMonitor:
             # Send periodic updates while signal is active
             while True:
                 if self.signal_active:
+                    # Send JSON format with full detection data
+                    avg_confidence = (self.current_confidence["person"] + self.current_confidence["cup"]) / 2
                     message = {
                         "status": "active",
                         "timestamp": datetime.now().isoformat(),
                         "frame": self.frame_count,
                         "detection": self.current_detection,
+                        "confidence": self.current_confidence,
+                        "average_confidence": round(avg_confidence, 3),
                         "all_objects": self.all_objects
                     }
                     await websocket.send(json.dumps(message))
