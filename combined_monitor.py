@@ -26,8 +26,7 @@ class CameraMonitor:
             self.camera_process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True
+                stderr=subprocess.STDOUT
             )
             
             print("Camera monitoring started")
@@ -41,8 +40,8 @@ class CameraMonitor:
         if not self.camera_process:
             return
             
-        async for line in self.camera_process.stdout:
-            line = line.strip()
+        async for line_bytes in self.camera_process.stdout:
+            line = line_bytes.decode('utf-8').strip()
             
             # Parse YOLO detection output
             # Looking for lines like: "Object detected: person (confidence: 0.85)"
