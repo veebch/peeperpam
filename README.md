@@ -97,12 +97,14 @@ python3 combined_monitor.py
 This single command starts both the camera monitoring and WebSocket server that broadcasts all detected objects.
 
 ### Configure and Deploy the Client
-1. Edit the WiFi credentials in `main.py`:
-   - Replace `SSID = "whyayefi"` with your network name
-   - Replace `PASSWORD = "your_actual_password"` with your WiFi password
-   - Ensure `SERVER_IP = "peeper.local"` matches your Pi's hostname
+1. **Edit configuration in `config.py`**:
+   - WiFi credentials: Replace `SSID` and `PASSWORD` with your network details
+   - Object detection: Customize `INTERESTING_OBJECTS` list to monitor different objects
+   - Detection priorities: Adjust `PERSON_SCALE`, `CUP_SCALE`, and `OTHER_SCALE` values
+   - Sound settings: Modify `SOUND_THRESHOLD`, `SOUND_COOLDOWN`, and UFO sound parameters
+   - Hardware pins: Change pin assignments if using different GPIO connections
 
-2. Copy `main.py` to your Pico W using Ampy, Thonny, or your preferred method
+2. Copy both `main.py` and `config.py` to your Pico W using Ampy, Thonny, or your preferred method
 
 3. Power on the Pico W - it will automatically connect to WiFi and start receiving detection alerts
 

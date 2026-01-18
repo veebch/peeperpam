@@ -8,18 +8,23 @@ import re
 import ujson as json
 import math
 from machine import Pin, PWM
+from config import *
 
-# Replace these with your Wi-Fi credentials
-SSID = "whyayefi"  # Replace with your actual WiFi SSID  
-PASSWORD = "your_actual_password"  # Replace with your actual WiFi password
-# Replace with your Raspberry Pi's IP address
-SERVER_IP = "peeper.local"  # Use hostname instead of IP
-SERVER_PORT = 6789
+# Hardware pin definitions
+RED_PIN = 18
+GREEN_PIN = 19
+BLUE_PIN = 20
+ALERT_PIN = 27
+BUZZER_PIN = 15
+
+# Startup sequence timing
+STARTUP_RAMP_DURATION = 2.0  # Seconds for ramp up/down
+STARTUP_STEPS = 100          # Number of steps in ramp sequence
 
 # RGB LED pins with PWM
-red_pin = PWM(Pin(18))
-green_pin = PWM(Pin(19))
-blue_pin = PWM(Pin(20))
+red_pin = PWM(Pin(RED_PIN))
+green_pin = PWM(Pin(GREEN_PIN))
+blue_pin = PWM(Pin(BLUE_PIN))
 
 # Set PWM frequency for LED
 for pin in [red_pin, green_pin, blue_pin]:
@@ -27,19 +32,16 @@ for pin in [red_pin, green_pin, blue_pin]:
     pin.duty_u16(0)
 
 # Alert PWM pin
-alert = PWM(Pin(27))
+alert = PWM(Pin(ALERT_PIN))
 alert.freq(1000)
 
 # Buzzer pin for sound alerts
-BUZZER_PIN = 15
 buzzer = PWM(Pin(BUZZER_PIN))
 buzzer.duty_u16(0)  # start silent
 
 # Sound threshold and state tracking
-SOUND_THRESHOLD = 0.5  # Trigger sound when detection confidence > 50%
 sound_playing = False
 last_sound_time = 0
-SOUND_COOLDOWN = 5.0  # Minimum seconds between sound triggers
 
 # Connect to Wi-Fi
 print("Connecting to WiFi network:", SSID)
@@ -59,15 +61,14 @@ wlan.connect(SSID, PASSWORD)
 print("Connection request sent, waiting for connection...")
 
 connection_attempts = 0
-max_attempts = 100  # 10 seconds total
-while not wlan.isconnected() and connection_attempts < max_attempts:
+while not wlan.isconnected() and connection_attempts < WIFI_MAX_ATTEMPTS:
     connection_attempts += 1
     if connection_attempts % 10 == 0:  # Log every 1 second
         print("Still connecting... (attempt", connection_attempts, ")")
-    time.sleep(0.1)
+    time.sleep(WIFI_RETRY_DELAY)
 
 if not wlan.isconnected():
-    print("Failed to connect to WiFi after", max_attempts/10, "seconds")
+    print("Failed to connect to WiFi after", WIFI_MAX_ATTEMPTS/10, "seconds")
     print("WiFi Status:", wlan.status())
     print("Check your SSID and password")
     # Don't continue without WiFi
@@ -83,7 +84,7 @@ print("DNS:", ip_info[3])
 
 # Wait a moment for network stack to fully initialize
 print("Waiting for network stack to stabilize...")
-time.sleep(3)
+time.sleep(NETWORK_STABILIZE_DELAY)
 
 def set_rgb_pwm(r, g, b):
     """Set RGB LED color using PWM values (0-65535)"""
@@ -123,22 +124,8 @@ async def play_ufo_sound():
     sound_playing = True
     print("Playing UFO sound alert!")
     
-    # UFO sound parameters
-    F_BASE = 600        # base frequency (Hz)
-    F_DEPTH = 300       # pitch modulation depth
-    LFO_RATE_HZ = 15 / 2.3  # pitch LFO frequency (Hz)
-    
-    VOL_DEPTH = 0.3     # amplitude modulation depth (0.0 - 1)
-    VOLUME = 1          # global volume scale (0.0 - 1.0)
-    
-    FADE_IN_SEC = 0.1
-    SUSTAIN_SEC = 2.0
-    FADE_OUT_SEC = 1.0
-    
-    STEP_MS = 5         # CPU delay between updates
-    
     start_time = time.ticks_us()
-    total_time = FADE_IN_SEC + SUSTAIN_SEC + FADE_OUT_SEC
+    total_time = UFO_FADE_IN_SEC + UFO_SUSTAIN_SEC + UFO_FADE_OUT_SEC
     
     try:
         while True:
@@ -148,27 +135,27 @@ async def play_ufo_sound():
                 break  # stop after full sound duration
 
             # Fade-in / sustain / fade-out scaling
-            if t < FADE_IN_SEC:
-                scale = t / FADE_IN_SEC
-            elif t < FADE_IN_SEC + SUSTAIN_SEC:
+            if t < UFO_FADE_IN_SEC:
+                scale = t / UFO_FADE_IN_SEC
+            elif t < UFO_FADE_IN_SEC + UFO_SUSTAIN_SEC:
                 scale = 1.0
             else:
-                scale = (total_time - t) / FADE_OUT_SEC
+                scale = (total_time - t) / UFO_FADE_OUT_SEC
 
             # Pitch modulation (LFO)
-            pitch_mod = math.sin(2 * math.pi * LFO_RATE_HZ * t)
-            freq = int(F_BASE + F_DEPTH * pitch_mod)
+            pitch_mod = math.sin(2 * math.pi * UFO_LFO_RATE * t)
+            freq = int(UFO_BASE_FREQ + UFO_FREQ_DEPTH * pitch_mod)
             buzzer.freq(freq)
 
             # Volume modulation with global volume
-            phase_vol = 2 * math.pi * LFO_RATE_HZ * t + math.pi / 4
-            vol_mod = (math.sin(phase_vol) * VOL_DEPTH + 1 - VOL_DEPTH) / 2
-            vol_mod *= VOLUME
+            phase_vol = 2 * math.pi * UFO_LFO_RATE * t + math.pi / 4
+            vol_mod = (math.sin(phase_vol) * UFO_VOLUME_DEPTH + 1 - UFO_VOLUME_DEPTH) / 2
+            vol_mod *= UFO_VOLUME
 
             # Duty cycle with fade
             buzzer.duty_u16(int(vol_mod * scale * 65535))
 
-            await asyncio.sleep_ms(STEP_MS)
+            await asyncio.sleep_ms(UFO_STEP_MS)
 
     except Exception as e:
         print("Sound error:", e)
@@ -181,15 +168,13 @@ async def startup_sequence():
     """Startup sequence: ramp up to full over 2 seconds, then down over 2 seconds"""
     global last_sound_time, sound_playing
     
-    ramp_duration = 2.0
-    steps = 100
-    step_duration = ramp_duration / steps
+    step_duration = STARTUP_RAMP_DURATION / STARTUP_STEPS
     sound_triggered = False  # Track if we've triggered sound during startup
 
     # Ramp up (reduce logging)
     print("Starting up - ramping up...")
-    for i in range(steps + 1):
-        duty = i / steps
+    for i in range(STARTUP_STEPS + 1):
+        duty = i / STARTUP_STEPS
         set_duty_cycle(duty, verbose=False)  # Suppress verbose output during startup
         
         # Check if we should trigger sound during startup ramp
@@ -207,8 +192,8 @@ async def startup_sequence():
 
     # Ramp down
     print("Ramping down...")
-    for i in range(steps, -1, -1):
-        duty = i / steps
+    for i in range(STARTUP_STEPS, -1, -1):
+        duty = i / STARTUP_STEPS
         set_duty_cycle(duty, verbose=False)  # Suppress verbose output during startup
         await asyncio.sleep(step_duration)
 
@@ -258,7 +243,7 @@ class WebSocketClient:
                     self.sock.close()
                 self.sock = None
                 print("Retrying connection in 5 seconds...")
-                time.sleep(5)
+                time.sleep(WEBSOCKET_RETRY_DELAY)
 
     def read_bytes(self, num_bytes):
         data = bytearray()
@@ -374,8 +359,8 @@ def parse_detection_data(message):
                 if isinstance(person_data, dict):
                     person_conf = person_data["confidence"]
                     print("Person detected - confidence:", person_conf)
-                    # Scale down to 70% for person-only detection
-                    return person_conf * 0.7
+                    # Scale down for person-only detection
+                    return person_conf * PERSON_SCALE
                     
             # Priority 3: Respond to cup detection (lower priority)
             elif "cup" in all_objects:
@@ -383,20 +368,19 @@ def parse_detection_data(message):
                 if isinstance(cup_data, dict):
                     cup_conf = cup_data["confidence"]
                     print("Cup detected - confidence:", cup_conf)
-                    # Scale down to 30% for cup-only detection
-                    return cup_conf * 0.3
+                    # Scale down for cup-only detection
+                    return cup_conf * CUP_SCALE
                     
             # Priority 4: Other interesting objects (very low response)
             else:
-                interesting_objects = ["bottle", "laptop", "cell phone", "book", "tv"]
-                for obj in interesting_objects:
+                for obj in INTERESTING_OBJECTS:
                     if obj in all_objects:
                         obj_data = all_objects[obj]
                         if isinstance(obj_data, dict):
                             obj_conf = obj_data["confidence"]
                             print(obj + " detected - confidence:", obj_conf)
                             # Very low response for other objects
-                            return obj_conf * 0.1
+                            return obj_conf * OTHER_SCALE
                             
                 print("Objects detected but no priority matches")
                 
@@ -468,7 +452,7 @@ async def listen_for_signal():
             print("Error:", e)
         finally:
             ws.close()
-            await asyncio.sleep(5)
+            await asyncio.sleep(WEBSOCKET_RETRY_DELAY)
 
 async def main():
     """Main async function to run startup and then listen for signals"""
