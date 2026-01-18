@@ -6,6 +6,7 @@ import os
 import time
 import re
 import ujson as json
+import math
 from machine import Pin, PWM
 
 # Replace these with your Wi-Fi credentials
@@ -28,6 +29,17 @@ for pin in [red_pin, green_pin, blue_pin]:
 # Alert PWM pin
 alert = PWM(Pin(27))
 alert.freq(1000)
+
+# Buzzer pin for sound alerts
+BUZZER_PIN = 15
+buzzer = PWM(Pin(BUZZER_PIN))
+buzzer.duty_u16(0)  # start silent
+
+# Sound threshold and state tracking
+SOUND_THRESHOLD = 0.5  # Trigger sound when detection confidence > 50%
+sound_playing = False
+last_sound_time = 0
+SOUND_COOLDOWN = 5.0  # Minimum seconds between sound triggers
 
 # Connect to Wi-Fi
 print("Connecting to WiFi network:", SSID)
@@ -104,6 +116,66 @@ def set_duty_cycle(duty, verbose=True):
         red_val = int(duty*65535)
         green_val = int((1-duty)*65535)
         print("LED color updated (red:", red_val, ", green:", green_val, ")")
+
+async def play_ufo_sound():
+    """Play UFO sound effect asynchronously"""
+    global sound_playing
+    sound_playing = True
+    print("Playing UFO sound alert!")
+    
+    # UFO sound parameters
+    F_BASE = 600        # base frequency (Hz)
+    F_DEPTH = 300       # pitch modulation depth
+    LFO_RATE_HZ = 15 / 2.3  # pitch LFO frequency (Hz)
+    
+    VOL_DEPTH = 0.3     # amplitude modulation depth (0.0 - 1)
+    VOLUME = 1          # global volume scale (0.0 - 1.0)
+    
+    FADE_IN_SEC = 0.1
+    SUSTAIN_SEC = 2.0
+    FADE_OUT_SEC = 1.0
+    
+    STEP_MS = 5         # CPU delay between updates
+    
+    start_time = time.ticks_us()
+    total_time = FADE_IN_SEC + SUSTAIN_SEC + FADE_OUT_SEC
+    
+    try:
+        while True:
+            # Elapsed time in seconds
+            t = time.ticks_diff(time.ticks_us(), start_time) / 1_000_000
+            if t > total_time:
+                break  # stop after full sound duration
+
+            # Fade-in / sustain / fade-out scaling
+            if t < FADE_IN_SEC:
+                scale = t / FADE_IN_SEC
+            elif t < FADE_IN_SEC + SUSTAIN_SEC:
+                scale = 1.0
+            else:
+                scale = (total_time - t) / FADE_OUT_SEC
+
+            # Pitch modulation (LFO)
+            pitch_mod = math.sin(2 * math.pi * LFO_RATE_HZ * t)
+            freq = int(F_BASE + F_DEPTH * pitch_mod)
+            buzzer.freq(freq)
+
+            # Volume modulation with global volume
+            phase_vol = 2 * math.pi * LFO_RATE_HZ * t + math.pi / 4
+            vol_mod = (math.sin(phase_vol) * VOL_DEPTH + 1 - VOL_DEPTH) / 2
+            vol_mod *= VOLUME
+
+            # Duty cycle with fade
+            buzzer.duty_u16(int(vol_mod * scale * 65535))
+
+            await asyncio.sleep_ms(STEP_MS)
+
+    except Exception as e:
+        print("Sound error:", e)
+    finally:
+        buzzer.duty_u16(0)  # ensure buzzer is silent
+        sound_playing = False
+        print("UFO sound complete")
 
 def startup_sequence():
     """Startup sequence: ramp up to full over 2 seconds, then down over 2 seconds"""
@@ -307,8 +379,15 @@ def parse_detection_data(message):
                         obj_data = all_objects[obj]
                         if isinstance(obj_data, dict):
                             obj_conf = obj_data["confidence"]
-                                print(obj + " detected - confidence:", obj_conf)
-        print("Error parsing JSON:", str(e))
+                            print(obj + " detected - confidence:", obj_conf)
+                            # Very low response for other objects
+                            return obj_conf * 0.1
+                            
+                print("Objects detected but no priority matches")
+                
+        return 0.0  # No significant objects detected
+            
+    except (ValueError, KeyError) as e:
         
         # Fallback to old string parsing for compatibility
         return parse_string_legacy(message)
@@ -330,13 +409,26 @@ def parse_string_legacy(input_string):
 
     return number_in_parentheses
 
-def perform_action(signal):
+async def perform_action(signal):
+    global last_sound_time, sound_playing
     print("Processing detection signal!")
     # Parse the detection data (JSON or legacy string)
     duty = parse_detection_data(signal)
     if duty > 0:
         print("Setting PWM duty to:", duty)
         set_duty_cycle(duty)
+        
+        # Check if we should trigger sound alert
+        current_time = time.time()
+        if (duty > SOUND_THRESHOLD and 
+            not sound_playing and 
+            (current_time - last_sound_time) > SOUND_COOLDOWN):
+            
+            print(f"Detection above threshold ({duty:.2f} > {SOUND_THRESHOLD}) - triggering sound!")
+            last_sound_time = current_time
+            # Start sound in background
+            asyncio.create_task(play_ufo_sound())
+        
     else:
         print("No significant detection - PWM remains at current level")
 
@@ -351,10 +443,10 @@ async def listen_for_signal():
                     # Handle all JSON detection messages
                     if signal.startswith('{'):
                         print("Detection message received")
-                        perform_action(signal)
+                        await perform_action(signal)
                     elif "Object" in signal or "person" in signal:
                         print("Legacy signal received:", signal)
-                        perform_action(signal)
+                        await perform_action(signal)
                     else:
                         print("Server message:", signal)
         except Exception as e:
