@@ -8,7 +8,7 @@ An overengineered reboot of the old ThinkGeek C.H.I.M.P. monitor mirror.
 
 AKA How to make a desktop device that provides alerts when objects are detected on a live-stream by a server performing computer vision analysis. 
 
-It uses a Raspberry Pi 5 with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client. The system detects all objects but provides priority-based responses: person+cup combinations trigger 100% alerts, person detection alone triggers 70% response, cup detection triggers 30% response, and other interesting objects trigger 10% response. Alerts are sent via WebSocket with RGB LED color changes and PWM-controlled analog needle movement showing detection confidence.
+It uses a Raspberry Pi 5 with a camera and Raspberry Pi AI kit as the server, and a Pico W as the client. The system detects all objects but provides priority-based responses: person+cup combinations trigger 100% alerts, person detection alone triggers 70% response, cup detection triggers 30% response, and other interesting objects trigger 10% response. Alerts are sent via WebSocket with RGB LED color changes, PWM-controlled analog needle movement showing detection confidence, and UFO sound alerts for detections above 50% threshold.
 
 ## Explainer Video
 
@@ -43,6 +43,7 @@ Here's an overview video of the build and a demo of it in action (it shows the i
 - 1K Ohm resistor
 - MOSFET (We used a Small Signal BS170)
 - A 4 legged RGB LED
+- Passive buzzer
 
 ## Assembly
 
@@ -55,6 +56,7 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 - From the Pico, GPIO 27 is soldered to the 1K Ohm resistor which in turn is soldered to the gate (middle pin) of the MOSFET. 
 - The VSYS connection on the Pico is connected the positive terminal of the voltmeter. 
 - The Cathode (negative) leg of the LED is connected to a GND pin on the Pico in series with the 220 ohm resistor. The Red, Green and Blue legs are connected to GP18, GP19 and GP20 respectively
+- The passive buzzer positive terminal is connected to GPIO 15, and the negative terminal to GND
 - The Source leg of the MOSFET is connected to the Negative terminal on the voltmeter, the Drain leg of the MOSFET is then connected to a GND GPIO on the Pico W. Here's a photo of the back of the detector
 
 ![Detector](/images/detector.jpg)
@@ -108,6 +110,8 @@ This single command starts both the camera monitoring and WebSocket server that 
 - The system detects all objects but responds with different priority levels
 - RGB LED changes from green (low priority) to red (high priority) 
 - Analog needle shows detection confidence scaled by priority level
+- UFO sound alert plays when detection confidence exceeds 50% threshold
+- Sound includes 5-second cooldown to prevent constant triggering
 - WebSocket connection automatically reconnects if interrupted
 
 ## Caveats

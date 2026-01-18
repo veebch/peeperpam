@@ -177,25 +177,40 @@ async def play_ufo_sound():
         sound_playing = False
         print("UFO sound complete")
 
-def startup_sequence():
+async def startup_sequence():
     """Startup sequence: ramp up to full over 2 seconds, then down over 2 seconds"""
+    global last_sound_time, sound_playing
+    
     ramp_duration = 2.0
     steps = 100
     step_duration = ramp_duration / steps
+    sound_triggered = False  # Track if we've triggered sound during startup
 
     # Ramp up (reduce logging)
     print("Starting up - ramping up...")
     for i in range(steps + 1):
         duty = i / steps
         set_duty_cycle(duty, verbose=False)  # Suppress verbose output during startup
-        time.sleep(step_duration)
+        
+        # Check if we should trigger sound during startup ramp
+        if (duty > SOUND_THRESHOLD and 
+            not sound_triggered and 
+            not sound_playing):
+            
+            print(f"Startup PWM reached threshold ({duty:.2f} > {SOUND_THRESHOLD}) - triggering startup sound!")
+            sound_triggered = True
+            last_sound_time = time.time()  # Update last sound time
+            # Start sound in background
+            asyncio.create_task(play_ufo_sound())
+        
+        await asyncio.sleep(step_duration)
 
     # Ramp down
     print("Ramping down...")
     for i in range(steps, -1, -1):
         duty = i / steps
         set_duty_cycle(duty, verbose=False)  # Suppress verbose output during startup
-        time.sleep(step_duration)
+        await asyncio.sleep(step_duration)
 
     print("Startup complete")
 
@@ -455,8 +470,13 @@ async def listen_for_signal():
             ws.close()
             await asyncio.sleep(5)
 
-# Run startup sequence
-startup_sequence()
+async def main():
+    """Main async function to run startup and then listen for signals"""
+    # Run startup sequence
+    await startup_sequence()
+    # Start listening for detection signals
+    await listen_for_signal()
 
-asyncio.run(listen_for_signal())
+# Run the main async function
+asyncio.run(main())
 
