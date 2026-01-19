@@ -99,7 +99,7 @@ This single command starts both the camera monitoring and WebSocket server that 
 ### Configure and Deploy the Client
 1. **Edit configuration in `config.py`**:
    - WiFi credentials: Replace `SSID` and `PASSWORD` with your network details
-   - Object detection: Customize `INTERESTING_OBJECTS` list to monitor different objects
+   - Object detection: Customize `INTERESTING_OBJECTS` list to monitor different objects (from the [COCO 80](https://blog.roboflow.com/microsoft-coco-classes/) list by default but you can train on other image data)
    - Detection priorities: Adjust `PERSON_SCALE`, `CUP_SCALE`, and `OTHER_SCALE` values
    - Sound settings: Modify `SOUND_THRESHOLD`, `SOUND_COOLDOWN`, and UFO sound parameters
    - Hardware pins: Change pin assignments if using different GPIO connections
