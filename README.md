@@ -2,11 +2,9 @@
 
 [![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCz5BOU9J9pB_O0B8-rDjCWQ?style=flat&logo=youtube&logoColor=red&labelColor=white&color=ffed53)](https://www.youtube.com/channel/UCz5BOU9J9pB_O0B8-rDjCWQ) [![Instagram](https://img.shields.io/github/stars/veebch?style=flat&logo=github&logoColor=black&labelColor=white&color=ffed53)](https://www.instagram.com/v_e_e_b/)
 
-# Peeper Pam
+# Hildegard
 
-An overengineered reboot of the old ThinkGeek C.H.I.M.P. monitor mirror. 
-
-AKA How to make a desktop device that provides alerts when objects are detected on a live-stream by a server performing computer vision analysis. 
+A Computer Vision Sentry 
 
 It uses a Raspberry Pi 5 with a camera and Raspberry Pi AI HAT+ 2 as the server, and a Pico W as the client. The system detects all objects but provides priority-based responses: person+cup combinations trigger 100% alerts, person detection alone triggers 70% response, cup detection triggers 30% response, and other interesting objects trigger 10% response. Alerts are sent via WebSocket with RGB LED color changes, PWM-controlled analog needle movement showing detection confidence, and UFO sound alerts for detections above 50% threshold.
 
