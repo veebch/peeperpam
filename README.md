@@ -33,7 +33,7 @@ Here's an overview video of the build and a demo of it in action (it shows the i
 ##  Materials
 ### Server 
 - Raspberry Pi 5
-- Raspberry Pi AI Kit
+- Raspberry Pi AI+ 2 Kit
 - Camera module 
 
 ### Detector
