@@ -57,7 +57,6 @@ Connect the M2 expansion board from the AI kit to the Pi 5, connect the 22 pin r
 - The passive buzzer positive terminal is connected to GPIO 15, and the negative terminal to GND
 - The Source leg of the MOSFET is connected to the Negative terminal on the voltmeter, the Drain leg of the MOSFET is then connected to a GND GPIO on the Pico W. Here's a photo of the back of the detector
 
-![Detector](/images/detector.jpg)
 
 ## Installing
 
