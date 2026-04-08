@@ -22,7 +22,7 @@ Here's an overview video of the build and a demo of it in action (it shows the i
 
 ### Client Components  
 - **main.py** - MicroPython WebSocket client for Pico W that receives detection data and provides priority-based responses:
-  - Person + Cup: 100% PWM alert (red LED)
+  - Person + Cup: 100% PWM alert
   - Person only: 70% PWM response 
   - Cup only: 30% PWM response
   - Other objects: 10% PWM response
