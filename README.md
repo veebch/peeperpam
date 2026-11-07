@@ -8,11 +8,15 @@ A Computer Vision Sentry
 
 It uses a Raspberry Pi 5 with a camera and Raspberry Pi AI HAT+ 2 as the server, and a Pico W as the client. The system detects all objects but provides priority-based responses: person+cup combinations trigger 100% alerts, person detection alone triggers 70% response, cup detection triggers 30% response, and other interesting objects trigger 10% response. Alerts are sent via WebSocket with RGB LED color changes, PWM-controlled analog needle movement showing detection confidence, and UFO sound alerts for detections above 50% threshold.
 
-## Explainer Video
+## Explainer Videos
 
-Here's an overview video of the build and a demo of it in action (it shows the initial red led only version):
+Here's two overview videos of the Hidegard version, and the original Peeper Pam in action:
+
+[![YouTubey](http://i.ytimg.com/vi/5TOP2SJovmY/hqdefault.jpg)](https://www.youtube.com/watch?v=5TOP2SJovmY)
 
 [![YouTube](http://i.ytimg.com/vi/Vn3WaVIr5v0/hqdefault.jpg)](https://www.youtube.com/watch?v=Vn3WaVIr5v0)
+
+
 
 
 ## Project Structure
