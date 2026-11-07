@@ -57,19 +57,16 @@ The LED fades from green (0%) to red (100%) as the priority rises.
 
 The printable parts are in the [`3d`](3d) folder.
 
-<!-- TODO: add the designer's name and a link to the original STL, and check its licence -->
-The enclosure is based on the [Old Lady clock](LINK_TO_STL) by DESIGNER_NAME.
+The enclosure is based on the [Old Lady clock](https://www.printables.com/@georgmierau) by Georg Mierau.
 
 ## Assembly
 
 ### Server
 
-<!-- TODO: confirm the HAT+ 2 fitting step against your build -->
 Fit the AI HAT+ 2 to the Pi 5, then connect the camera with the 22 pin ribbon cable to the CAM/DISP 0 port.
 
 ### Detector
 
-<!-- TODO: confirm the MOSFET wiring. The previous README had Source to the voltmeter and Drain to GND. For a BS170 used as a low side switch, Drain to the load and Source to GND is the usual arrangement. -->
 - Pico GPIO 27 goes through the 1K Ohm resistor to the gate (middle pin) of the MOSFET.
 - The Pico's VSYS pin goes to the positive terminal of the voltmeter.
 - The negative terminal of the voltmeter goes to the MOSFET's Drain, and the MOSFET's Source goes to a GND pin on the Pico.
@@ -138,11 +135,8 @@ The MOSFET may be overkill for an LED and a voltmeter. Powering the alarm from V
 
 The design was inspired by a sticker on Austrian trams asking passengers to give up their seat for cool-looking old ladies.
 
-<!-- TODO: designer credit, matching the Enclosure section -->
-Enclosure based on the Old Lady clock by DESIGNER_NAME.
+Enclosure based on the Old Lady clock by Georg Mierau.
 
 ## Licence
 
 The code is released under GPL-3.0. See [LICENSE](LICENSE).
-
-<!-- TODO: if the enclosure STL has a different licence, note it here -->
