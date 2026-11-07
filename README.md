@@ -12,8 +12,7 @@ Hildegard detects every object she can see, but some matter more than others. A 
 
 ## Video
 
-<!-- TODO: add the link to the new Hildegard video -->
-[![Hildegard on YouTube](http://i.ytimg.com/vi/NEW_VIDEO_ID/hqdefault.jpg)](https://www.youtube.com/watch?v=NEW_VIDEO_ID)
+[![Hildegard on YouTube](https://i.ytimg.com/vi/5TOP2SJovmY/hqdefault.jpg)](https://www.youtube.com/watch?v=5TOP2SJovmY)
 
 Hildegard is a rebuild of one of our earlier projects. Here's the [original version](https://www.youtube.com/watch?v=Vn3WaVIr5v0), which had a single red LED.
 
