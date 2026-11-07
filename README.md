@@ -57,7 +57,7 @@ The LED fades from green (0%) to red (100%) as the priority rises.
 
 The printable parts are in the [`3d`](3d) folder.
 
-The enclosure is based on the [Old Lady clock](https://www.printables.com/@georgmierau) by Georg Mierau.
+The enclosure is based on the [Old Lady clock](https://www.printables.com/model/953649-creepy-old-lady-from-vienna-clock) by Georg Mierau.
 
 ## Assembly
 
